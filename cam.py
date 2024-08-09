@@ -21,6 +21,8 @@ import cv2
 import os
 import logging
 import json 
+import platform
+import psutil
 
 from pyautogui import *
 from telebot import *
@@ -66,9 +68,11 @@ def start(message):
     item2 = types.KeyboardButton("🖥 Screenshot")
     item3 = types.KeyboardButton("⌨ Keyboard")
     item4 = types.KeyboardButton("🖱 Mouse")
-    item5 = types.KeyboardButton("📜 Logs")
-    item6 = types.KeyboardButton("⚙️ Settings")
-    markup.add(item1, item2, item3, item4, item5, item6)
+    item5 = types.KeyboardButton("📺 Information")
+    item6 = types.KeyboardButton("📜 Logs")
+    item7 = types.KeyboardButton("⚙️ Settings")
+    
+    markup.add(item1, item2, item3, item4, item5, item6, item7)
     bot.send_message(message.chat.id, "📁 Select option:", reply_markup=markup)
 @bot.message_handler(func=lambda message: message.text == "📸 Camera")
 def camera_shot(message):
@@ -117,6 +121,52 @@ def open_keyboard_menu(message):
     backb = types.KeyboardButton("◀ Back")
     markup.add(item31, item32, item33, item34, item35,backb)
     bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
+
+@bot.message_handler(func=lambda message: message.text == "📺 Information")
+def open_info_menu(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item31 = types.KeyboardButton("🖥 Screen Resolution")
+    item32 = types.KeyboardButton("📀 Computer Information")
+    item33 = types.KeyboardButton("📀 Boot Time")
+    item34 = types.KeyboardButton("📀 CPU Information")
+    backb = types.KeyboardButton("◀ Back")
+    markup.add(item31, item32, item33, item34,backb)
+    bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
+
+@bot.message_handler(func=lambda message: message.text == "🖥 Screen Resolution")
+def screen_res(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    bot.send_message(message.chat.id, f"🖥 {size()}")
+
+@bot.message_handler(func=lambda message: message.text == "📀 Computer Information")
+def computer_info(message):
+    if not message.from_user.id in users_ids:
+        return None
+    uname = platform.uname()
+    global rlgs
+    bot.send_message(message.chat.id, f"📀 System: {uname.system}\n| Node Name: {uname.node}\n| Version: {uname.version}\n| Machine: {uname.machine}\n| Processor: {uname.processor}")
+
+@bot.message_handler(func=lambda message: message.text == "📀 Boot Time")
+def boot_time(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    boot_time_timestamp = psutil.boot_time()
+    bt = datetime.fromtimestamp(boot_time_timestamp)
+    bot.send_message(message.chat.id, f"📀 Boot Time: {bt.year}/{bt.month}/{bt.day} {bt.hour}:{bt.minute}:{bt.second}")
+
+@bot.message_handler(func=lambda message: message.text == "📀 CPU Information")
+def cpu_info(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    cpufreq = psutil.cpu_freq()
+    bot.send_message(message.chat.id, f"📀 Physical cores: {psutil.cpu_count(logical=False)}\n| Max Frequency: {cpufreq.max:.2f}Mhz\n| CPU Usage: {psutil.cpu_percent()}%")
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Enter")
 def keyboard_enter(message):

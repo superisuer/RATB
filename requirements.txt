@@ -3,3 +3,4 @@ telebot
 keyboard
 pyautogui
 logging
+psutil
