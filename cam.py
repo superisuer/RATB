@@ -9,11 +9,21 @@ from pyautogui import *
 from datetime import datetime
 
 # ---------------------------------
-# VVV YOUR BOT TOKEN
-token=''
+# SETTINGS
+token = "" # Bot token
+
+write_logs = False
+file_logs = "logs.log"
+mode_logs = "w"
+format_logs = "%(asctime)s %(levelname)s %(message)s"
+
+users_ids = [] # Insert here the IDs of users who are allowed to use the bot
 # ---------------------------------
 
-logging.basicConfig(level=logging.INFO, filename="logs.log",filemode="w", format="%(asctime)s %(levelname)s %(message)s")
+if write_logs:
+	logging.basicConfig(level=logging.INFO, filename=file_logs,filemode=mode_logs, format=format_logs)
+
+
 rlgs = " "
 sysmode = 0
 alertmode = 0
@@ -23,6 +33,8 @@ bot=telebot.TeleBot(token)
 
 @bot.message_handler(commands=['start'])
 def start(message):
+    if not message.from_user.id in users_ids:
+    	return None
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     item1 = types.KeyboardButton("📸 Camera")
     item2 = types.KeyboardButton("🖥 Screenshot")
@@ -35,32 +47,41 @@ def start(message):
 @bot.message_handler(func=lambda message: message.text == "📸 Camera")
 
 def button1(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
-    current_datetime = datetime.now()
-    print("CAMERA @" + str(message.from_user.username))
-    write_data_time = str(current_datetime)
+    if write_logs:
+    	current_datetime = datetime.now()
+    	print("CAMERA @" + str(message.from_user.username))
+    	write_data_time = str(current_datetime)
+    	logging.info("CAMERA @" + str(message.from_user.username))
     cap = cv2.VideoCapture(0)
     ret, frame = cap.read()
     cv2.imwrite("camera1.png", frame)
     cap.release()
-    logging.info("CAMERA @" + str(message.from_user.username))
+    
     photo = open('camera1.png', 'rb')
     bot.send_photo(message.chat.id, photo)
     photo.close()
 
 @bot.message_handler(func=lambda message: message.text == "🖥 Screenshot")
 def button2(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
-    current_datetime = datetime.now()
-    write_data_time = str(current_datetime)
-    print(write_data_time + " SCREENSHOT @" + str(message.from_user.username))
+    if write_logs:
+    	current_datetime = datetime.now()
+    	write_data_time = str(current_datetime)
+    	print(write_data_time + " SCREENSHOT @" + str(message.from_user.username))
+    	logging.info("SCREENSHOT @" + str(message.from_user.username))
     screenshot("screen.png")
     scre = open('screen.png', 'rb')
-    logging.info("SCREENSHOT @" + str(message.from_user.username))
     bot.send_photo(message.chat.id, scre)
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Keyboard")
 def button3(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     item31 = types.KeyboardButton("⌨ Enter")
@@ -73,32 +94,44 @@ def button3(message):
     bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
 @bot.message_handler(func=lambda message: message.text == "⌨ Enter")
 def button4(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     press("enter")
     bot.send_message(message.chat.id, "✅ Success!")
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Backspace")
 def button5(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     press("backspace")
     bot.send_message(message.chat.id, "✅ Success!")
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Escape")
 def button6(message):
+    if not message.from_user.id in users_ids:
+    	return None
     press("esc")
     bot.send_message(message.chat.id, "✅ Success!")
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Alt+Tab")
 def button7(message):
+    if not message.from_user.id in users_ids:
+    	return None
     hotkey('alt', 'tab')
     bot.send_message(message.chat.id, "✅ Success!")
 @bot.message_handler(func=lambda message: message.text == "⌨ Windows+L")
 def button8(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     hotkey('win', 'l')
     bot.send_message(message.chat.id, "✅ Success!")
 @bot.message_handler(func=lambda message: message.text == "🖱 Mouse")
 def button11(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     item31 = types.KeyboardButton("🖱 Click")
@@ -108,14 +141,20 @@ def button11(message):
     bot.send_message(message.chat.id, "📁 Mouse: Select option:", reply_markup=markup)
 @bot.message_handler(func=lambda message: message.text == "🖱 Click")
 def button12(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     click()
 @bot.message_handler(func=lambda message: message.text == "🖱 Double click")
 def button13(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     doubleClick()
 @bot.message_handler(func=lambda message: message.text == "📜 Logs")
 def button14(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     logf = open("logs.log", "r")
     for line in logf:
@@ -127,6 +166,8 @@ def button14(message):
             bot.send_message(message.chat.id, "❌ Неизвестная ошибка")
 @bot.message_handler(func=lambda message: message.text == "⚙️ Settings")
 def button15(message):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     item63 = types.KeyboardButton("🌐 Language")
@@ -136,6 +177,8 @@ def button15(message):
 @bot.message_handler(func=lambda message: message.text == "🌐 Language")
 def button16(message):
     global rlgs
+    if not message.from_user.id in users_ids:
+    	return None
     bot.send_message(message.chat.id, "🌐 Language will be soon...")
 @bot.message_handler(func=lambda message: message.text == "◀ Back")
 def button16(message):
@@ -143,6 +186,8 @@ def button16(message):
     start(message)
 @bot.message_handler(content_types='text')
 def message_reply(message1):
+    if not message.from_user.id in users_ids:
+    	return None
     global rlgs
     if message1.text.startswith("Alert:"):
         alert(message1.text)
