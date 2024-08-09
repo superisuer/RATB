@@ -1,23 +1,36 @@
 import cv2
-from telebot import *
-from telebot import types
-from subprocess import run
-import time
 import os
 import logging
+import json 
+
 from pyautogui import *
+from telebot import *
+from telebot import types
 from datetime import datetime
 
 # ---------------------------------
 # SETTINGS
-token = "" # Bot token
+config_file = "configs/default.json" # JSON Config
+# ---------------------------------
 
-write_logs = False
-file_logs = "logs.log"
-mode_logs = "w"
-format_logs = "%(asctime)s %(levelname)s %(message)s"
+try:
+    f = open(config_file)
+    data = json.loads(f.read()) # Reading from file
+    f.close() # Closing file
+except Exception as e:
+    print(e)
+    exit()
 
-users_ids = [] # Insert here the IDs of users who are allowed to use the bot
+# ---------------------------------
+# DATA FROM CONFIG
+token = data["bot_token"]
+
+write_logs = data["write_logs"]
+file_logs = data["file_logs"]
+mode_logs = data["mode_logs"]
+format_logs = data["format_logs"]
+
+users_ids = data["bot_users"]
 # ---------------------------------
 
 if write_logs:
@@ -50,7 +63,7 @@ def button1(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
-    if write_logs:
+    if write_logs or write_logs == 1:
         current_datetime = datetime.now()
         print("CAMERA @" + str(message.from_user.username))
         write_data_time = str(current_datetime)
@@ -69,7 +82,7 @@ def button2(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
-    if write_logs:
+    if write_logs or write_logs == 1:
         current_datetime = datetime.now()
         write_data_time = str(current_datetime)
         print(write_data_time + " SCREENSHOT @" + str(message.from_user.username))
@@ -92,6 +105,7 @@ def button3(message):
     backb = types.KeyboardButton("◀ Back")
     markup.add(item31, item32, item33, item34, item35,backb)
     bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
+    
 @bot.message_handler(func=lambda message: message.text == "⌨ Enter")
 def button4(message):
     if not message.from_user.id in users_ids:
@@ -121,6 +135,7 @@ def button7(message):
         return None
     hotkey('alt', 'tab')
     bot.send_message(message.chat.id, "✅ Success!")
+
 @bot.message_handler(func=lambda message: message.text == "⌨ Windows+L")
 def button8(message):
     if not message.from_user.id in users_ids:
@@ -128,29 +143,32 @@ def button8(message):
     global rlgs
     hotkey('win', 'l')
     bot.send_message(message.chat.id, "✅ Success!")
+
 @bot.message_handler(func=lambda message: message.text == "🖱 Mouse")
 def button11(message):
     if not message.from_user.id in users_ids:
         return None
-    global rlgs
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     item31 = types.KeyboardButton("🖱 Click")
     item32 = types.KeyboardButton("🖱 Double click")    
     backb = types.KeyboardButton("◀ Back")
     markup.add(item31, item32,backb)
     bot.send_message(message.chat.id, "📁 Mouse: Select option:", reply_markup=markup)
+
 @bot.message_handler(func=lambda message: message.text == "🖱 Click")
 def button12(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
     click()
+
 @bot.message_handler(func=lambda message: message.text == "🖱 Double click")
 def button13(message):
     if not message.from_user.id in users_ids:
         return None
     global rlgs
     doubleClick()
+
 @bot.message_handler(func=lambda message: message.text == "📜 Logs")
 def button14(message):
     if not message.from_user.id in users_ids:
@@ -164,6 +182,7 @@ def button14(message):
                 bot.send_message(message.chat.id, "❌ Логи пустые")
         except:
             bot.send_message(message.chat.id, "❌ Неизвестная ошибка")
+
 @bot.message_handler(func=lambda message: message.text == "⚙️ Settings")
 def button15(message):
     if not message.from_user.id in users_ids:
@@ -174,16 +193,18 @@ def button15(message):
     backb = types.KeyboardButton("◀ Back")
     markup.add(item63,backb)
     bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
+
 @bot.message_handler(func=lambda message: message.text == "🌐 Language")
 def button16(message):
     global rlgs
     if not message.from_user.id in users_ids:
         return None
     bot.send_message(message.chat.id, "🌐 Language will be soon...")
+    
 @bot.message_handler(func=lambda message: message.text == "◀ Back")
 def button16(message):
-    global rlgs
     start(message)
+
 @bot.message_handler(content_types='text')
 def message_reply(message1):
     if not message1.from_user.id in users_ids:
@@ -198,4 +219,5 @@ def message_reply(message1):
     elif message1.text.startswith("Command:"):
         a = os.popen(message1.text).readlines()
         bot.send_message(message1.chat.id, f"🛡 {a}")
+
 bot.infinity_polling(none_stop=True)

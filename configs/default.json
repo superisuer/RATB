@@ -1,0 +1,8 @@
+{
+    "bot_token": "",
+    "bot_users": [],
+    "write_logs": 0,
+    "file_logs": "logs.log",
+    "mode_logs": "w",
+    "format_logs": "%(asctime)s %(levelname)s %(message)s"
+}

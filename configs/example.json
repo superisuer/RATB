@@ -1,0 +1,8 @@
+{
+    "bot_token": "1111111111:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "bot_users": [1234567890],
+    "write_logs": 1,
+    "file_logs": "logs.log",
+    "mode_logs": "w",
+    "format_logs": "%(asctime)s %(levelname)s %(message)s"
+}
