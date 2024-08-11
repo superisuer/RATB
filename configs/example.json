@@ -1,5 +1,5 @@
 {
-    "bot_token": "1111111111:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "bot_token": "1111111111:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "bot_users": [1234567890],
     "write_logs": 1,
     "file_logs": "logs.log",
