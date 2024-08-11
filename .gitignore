@@ -2,3 +2,5 @@ banner.png
 configs/*
 screenshot.png
 camera1.png
+*.json
+configs/default.json
